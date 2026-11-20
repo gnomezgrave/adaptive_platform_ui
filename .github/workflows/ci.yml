@@ -67,6 +67,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ubuntu-latest ships JDK 25; Gradle 8.12 only supports up to Java 24.
+      - name: Set up Java for Gradle
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
