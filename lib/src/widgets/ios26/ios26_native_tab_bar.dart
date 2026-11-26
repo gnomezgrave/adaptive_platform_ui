@@ -3,6 +3,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import '../adaptive_scaffold.dart';
 
 /// Native iOS 26 tab bar using UITabBar platform view
@@ -19,6 +20,7 @@ class IOS26NativeTabBar extends StatefulWidget {
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.showNativeView = true,
     this.hidden = false,
+    this.brightness,
   });
 
   final List<AdaptiveNavigationDestination> destinations;
@@ -38,6 +40,12 @@ class IOS26NativeTabBar extends StatefulWidget {
   /// Tab bar minimize behavior (iOS 26+)
   /// Controls how the tab bar minimizes when scrolling
   final TabBarMinimizeBehavior minimizeBehavior;
+
+  /// Override light/dark for the native UITabBar.
+  ///
+  /// When null, follows [CupertinoTheme] / [Theme] brightness from the app
+  /// (not [MediaQuery.platformBrightnessOf]).
+  final Brightness? brightness;
 
   @override
   State<IOS26NativeTabBar> createState() => _IOS26NativeTabBarState();
@@ -68,8 +76,12 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
   bool? _lastHidden;
 
-  bool get _isDark =>
-      MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+  Brightness get _effectiveBrightness =>
+      widget.brightness ??
+      CupertinoTheme.of(context).brightness ??
+      Theme.of(context).brightness;
+
+  bool get _isDark => _effectiveBrightness == Brightness.dark;
   bool get _isRtl => Directionality.of(context) == TextDirection.rtl;
   Color? get _effectiveTint =>
       widget.tint ?? CupertinoTheme.of(context).primaryColor;
@@ -77,6 +89,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   @override
   void didUpdateWidget(covariant IOS26NativeTabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _syncBrightnessIfNeeded();
     _syncPropsToNativeIfNeeded();
   }
 
@@ -98,11 +111,8 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     // Resolve CupertinoDynamicColor if needed
     Color resolvedColor = color;
     if (color is CupertinoDynamicColor) {
-      // Resolve based on current brightness
-      final brightness = MediaQuery.platformBrightnessOf(context);
-      resolvedColor = brightness == Brightness.dark
-          ? color.darkColor
-          : color.color;
+      // Resolve based on the app/tab-bar brightness, not the OS setting.
+      resolvedColor = _isDark ? color.darkColor : color.color;
     }
 
     return ((resolvedColor.a * 255.0).round() & 0xff) << 24 |
@@ -308,14 +318,19 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     _lastBg = widget.backgroundColor != null
         ? _colorToARGB(widget.backgroundColor!)
         : null;
-    _lastIsDark = _isDark;
-    _lastIsRtl = _isRtl;
+    // Creation params can be stale on device: UiKitView is created async, and
+    // theme may have switched (e.g. prefs hydrated system→light) before the
+    // view finishes. Leave these null so the post-frame sync always pushes.
+    _lastIsDark = null;
+    _lastIsRtl = null;
     _lastMinimizeBehavior = widget.minimizeBehavior;
     _requestIntrinsicSize();
     _cacheItems();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _channel != ch) return;
       _pushInitialStateToNative(ch);
+      _syncBrightnessIfNeeded();
+      _syncDirectionalityIfNeeded();
     });
   }
 
@@ -557,6 +572,11 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       if (style.isNotEmpty) {
         await ch.invokeMethod('setStyle', style);
       }
+
+      await ch.invokeMethod('setBrightness', {'isDark': _isDark});
+      _lastIsDark = _isDark;
+      await ch.invokeMethod('setDirectionality', {'isRtl': _isRtl});
+      _lastIsRtl = _isRtl;
 
       await ch.invokeMethod('setSelectedIndex', {
         'index': widget.selectedIndex,

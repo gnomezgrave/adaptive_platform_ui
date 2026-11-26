@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+* **NEW**: `AdaptiveBottomNavigationBar.brightness` sets the iOS 26+ native tab bar's light/dark appearance independently of the OS. When null, the bar follows the app's `CupertinoTheme` / `Theme` brightness instead of the raw system setting
 * **NEW**: `AdaptiveBottomSheet.show` presents a modal bottom sheet with your own widgets that rests at `AdaptiveSheetDetent`s (`medium`, `large` or any fraction), snaps between them and dismisses when dragged down. On iOS a full-height-only sheet is the system page sheet (`showCupertinoSheet`, the page behind it recedes); for other detents iOS 26+ draws a floating Liquid Glass sheet on a native `UIVisualEffectView` background that meets the screen edges at full height, and iOS 18 and below the opaque iOS sheet; Android uses Material 3 `showModalBottomSheet`. `scrollableBuilder` is an alternative to `builder` that hands the contents' scroll view a controller the sheet owns. Under the fixed toolbar, the toolbar fades out as a sheet rises over it, since it is drawn above every route. `IOSBottomSheetRoute` is exported for direct use
 * **NEW**: Choose the iOS 26+ toolbar backdrop with `AdaptiveAppBar.scrollEdgeEffectStyle`. The default `soft` gradually blurs scrolling content and fades it toward the page background behind the horizontal title, `hard` shows a tinted blur and hairline when scrolled under, and `none` leaves the controls over the page.
 * **FIX**: Reserve space for the automatic back button so long iOS 26 toolbar titles truncate before they reach it (@Anderzzon, #195)

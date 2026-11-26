@@ -142,10 +142,6 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         super.init()
 
         container.backgroundColor = .clear
-        if #available(iOS 13.0, *) {
-            container.overrideUserInterfaceStyle = isDark ? .dark : .light
-        }
-
 
         // Create single tab bar
         let bar = UITabBar(frame: .zero)
@@ -162,6 +158,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             bar.traitOverrides.layoutDirection = isRtl ? .rightToLeft : .leftToRight
         }
         container.semanticContentAttribute = semanticAttribute
+        // Same for light/dark: portal-backed glass can ignore the container override
+        // and follow the phone unless the bar's own style / traitOverrides are set.
+        applyInterfaceStyle(isDark: isDark)
 
         // iOS 26+ special handling - Skip appearance, use direct properties only
         if #available(iOS 26.0, *) {
@@ -381,6 +380,19 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self = self else { result(nil); return }
             self.handleMethodCall(call, result: result)
+        }
+    }
+
+    /// Liquid Glass portals can ignore a container-only override and keep the
+    /// phone appearance; pin style on the bar (and traitOverrides) as well.
+    private func applyInterfaceStyle(isDark: Bool) {
+        let style: UIUserInterfaceStyle = isDark ? .dark : .light
+        if #available(iOS 13.0, *) {
+            container.overrideUserInterfaceStyle = style
+            tabBar?.overrideUserInterfaceStyle = style
+        }
+        if #available(iOS 17.0, *) {
+            tabBar?.traitOverrides.userInterfaceStyle = style
         }
     }
 
@@ -633,9 +645,14 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 return
             }
 
-            if #available(iOS 13.0, *) {
-                self.container.overrideUserInterfaceStyle = isDark ? .dark : .light
+            self.applyInterfaceStyle(isDark: isDark)
+            // iOS 26 Liquid Glass bakes appearance into items; rebuild so the
+            // new interface style actually takes effect on device.
+            if #available(iOS 26.0, *) {
+                self.rebuildItemsWithCurrentState()
             }
+            self.tabBar?.setNeedsLayout()
+            self.tabBar?.layoutIfNeeded()
             result(nil)
 
         case "setDirectionality":

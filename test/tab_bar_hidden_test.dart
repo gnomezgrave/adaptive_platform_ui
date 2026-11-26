@@ -134,5 +134,46 @@ void main() {
 
       expect(find.byType(IOS26NativeTabBar), findsOneWidget);
     });
+
+    testWidgets('accepts brightness override', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: IOS26NativeTabBar(
+              brightness: Brightness.dark,
+              destinations: const [
+                AdaptiveNavigationDestination(icon: Icons.home, label: 'Home'),
+              ],
+              selectedIndex: 0,
+              onTap: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final bar = tester.widget<IOS26NativeTabBar>(
+        find.byType(IOS26NativeTabBar),
+      );
+      expect(bar.brightness, Brightness.dark);
+    });
+  });
+
+  group('AdaptiveBottomNavigationBar.brightness', () {
+    test('stores and copies brightness', () {
+      const bar = AdaptiveBottomNavigationBar(
+        brightness: Brightness.light,
+        selectedIndex: 0,
+        onTap: _noop,
+        items: [
+          AdaptiveNavigationDestination(icon: Icons.home, label: 'Home'),
+        ],
+      );
+
+      expect(bar.brightness, Brightness.light);
+      expect(bar.copyWith(brightness: Brightness.dark).brightness, Brightness.dark);
+      expect(bar.copyWith().brightness, Brightness.light);
+    });
   });
 }
+
+void _noop(int _) {}
