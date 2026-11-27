@@ -25,6 +25,7 @@ class AdaptiveBottomNavigationBar {
     this.bottomNavigationBar,
     this.selectedItemColor,
     this.unselectedItemColor,
+    this.brightness,
   });
 
   /// Navigation items for bottom navigation bar
@@ -88,6 +89,15 @@ class AdaptiveBottomNavigationBar {
   /// If null, uses platform defaults.
   final Color? unselectedItemColor;
 
+  /// Light/dark appearance for the iOS 26+ native tab bar.
+  ///
+  /// Use this when the app's theme should differ from the OS appearance
+  /// (for example `ThemeMode.light` while the phone is in dark mode).
+  ///
+  /// When null, the native bar follows [CupertinoTheme] / [Theme] brightness
+  /// from the ambient app theme — not the raw system setting.
+  final Brightness? brightness;
+
   /// Creates a copy of this bottom navigation bar with the given fields replaced
   AdaptiveBottomNavigationBar copyWith({
     List<AdaptiveNavigationDestination>? items,
@@ -98,6 +108,7 @@ class AdaptiveBottomNavigationBar {
     Widget? bottomNavigationBar,
     Color? selectedItemColor,
     Color? unselectedItemColor,
+    Brightness? brightness,
   }) {
     return AdaptiveBottomNavigationBar(
       items: items ?? this.items,
@@ -108,6 +119,7 @@ class AdaptiveBottomNavigationBar {
       bottomNavigationBar: bottomNavigationBar ?? this.bottomNavigationBar,
       selectedItemColor: selectedItemColor ?? this.selectedItemColor,
       unselectedItemColor: unselectedItemColor ?? this.unselectedItemColor,
+      brightness: brightness ?? this.brightness,
     );
   }
 }

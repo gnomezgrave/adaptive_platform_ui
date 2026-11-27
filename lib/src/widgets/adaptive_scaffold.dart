@@ -659,6 +659,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             selectedItemColor: widget.bottomNavigationBar!.selectedItemColor,
             unselectedItemColor:
                 widget.bottomNavigationBar!.unselectedItemColor,
+            brightness: widget.bottomNavigationBar!.brightness,
             hidden: widget.tabBarHidden,
           );
         }
@@ -1154,6 +1155,7 @@ class _MinimizableTabBar extends StatefulWidget {
     required this.enableBlur,
     this.selectedItemColor,
     this.unselectedItemColor,
+    this.brightness,
     this.hidden = false,
   });
 
@@ -1164,6 +1166,7 @@ class _MinimizableTabBar extends StatefulWidget {
   final bool enableBlur;
   final Color? selectedItemColor;
   final Color? unselectedItemColor;
+  final Brightness? brightness;
   final bool hidden;
 
   @override
@@ -1274,6 +1277,7 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
             widget.selectedItemColor ?? CupertinoTheme.of(context).primaryColor,
         unselectedItemTint: widget.unselectedItemColor,
         minimizeBehavior: widget.minimizeBehavior,
+        brightness: widget.brightness,
         hidden: widget.hidden,
       ),
     );

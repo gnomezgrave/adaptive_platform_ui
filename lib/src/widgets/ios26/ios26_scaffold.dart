@@ -493,19 +493,31 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               child: widget.enableBlur
                   ? IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
-                      selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
+                      selectedIndex:
+                          widget.bottomNavigationBar!.selectedIndex!,
                       onTap: widget.bottomNavigationBar!.onTap!,
-                      tint: CupertinoTheme.of(context).primaryColor,
+                      tint:
+                          widget.bottomNavigationBar!.selectedItemColor ??
+                          CupertinoTheme.of(context).primaryColor,
+                      unselectedItemTint:
+                          widget.bottomNavigationBar!.unselectedItemColor,
                       minimizeBehavior: widget.minimizeBehavior,
+                      brightness: widget.bottomNavigationBar!.brightness,
                       showNativeView: showNativeView,
                       hidden: widget.tabBarHidden,
                     )
                   : IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
-                      selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
+                      selectedIndex:
+                          widget.bottomNavigationBar!.selectedIndex!,
                       onTap: widget.bottomNavigationBar!.onTap!,
-                      tint: CupertinoTheme.of(context).primaryColor,
+                      tint:
+                          widget.bottomNavigationBar!.selectedItemColor ??
+                          CupertinoTheme.of(context).primaryColor,
+                      unselectedItemTint:
+                          widget.bottomNavigationBar!.unselectedItemColor,
                       minimizeBehavior: widget.minimizeBehavior,
+                      brightness: widget.bottomNavigationBar!.brightness,
                       showNativeView: showNativeView,
                       hidden: widget.tabBarHidden,
                     ),
